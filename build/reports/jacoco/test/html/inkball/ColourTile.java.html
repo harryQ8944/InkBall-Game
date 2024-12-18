@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColourTile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">home</a> &gt; <a href="index.source.html" class="el_package">inkball</a> &gt; <span class="el_source">ColourTile.java</span></div><h1>ColourTile.java</h1><pre class="source lang-java linenums">package inkball;
+
+public class ColourTile extends GreyTile {
+    private int colour;
+<span class="fc" id="L5">    private boolean canBeHit = true;</span>
+    private static final int HIT_COOLDOWN_FRAMES = 5; // Cooldown frames before the wall can be hit again
+<span class="fc" id="L7">    private int cooldownCounter = 0;</span>
+
+    public ColourTile(int x, int y, int colour, App app) {
+<span class="fc" id="L10">        super(x, y, app);</span>
+<span class="fc" id="L11">        this.colour = colour;</span>
+<span class="fc" id="L12">        this.Image = app.loadImage(&quot;src/main/resources/inkball/wall&quot; + colour + &quot;.png&quot;);</span>
+<span class="fc" id="L13">        System.out.println(&quot;Created ColouredWallTile at (&quot; + x + &quot;, &quot; + y + &quot;) with colour index: &quot; + colour);</span>
+<span class="fc" id="L14">    }</span>
+
+    public void updateCooldown() {
+<span class="fc bfc" id="L17" title="All 2 branches covered.">        if (!canBeHit) {</span>
+<span class="fc" id="L18">            cooldownCounter--;</span>
+<span class="fc bfc" id="L19" title="All 2 branches covered.">            if (cooldownCounter &lt;= 0) {</span>
+<span class="fc" id="L20">                canBeHit = true;</span>
+            }
+        }
+<span class="fc" id="L23">    }</span>
+    
+    @Override
+    public void getsHit(Ball ball) {
+        // Check if the wall can be hit and if the ball color matches or is grey
+<span class="pc bpc" id="L28" title="2 of 8 branches missed.">        if (!canBeHit || isDestroyed || (colour != 0 &amp;&amp; ball.getColour() != colour)) {</span>
+<span class="pc bpc" id="L29" title="2 of 4 branches missed.">            if (colour != 0 &amp;&amp; ball.getColour() != colour) {</span>
+<span class="fc" id="L30">                System.out.println(&quot;ColouredWallTile get hit at (&quot; + getX() + &quot;, &quot; + getY() + &quot;) hit, Different colour!&quot;);</span>
+            }
+<span class="fc" id="L32">            return; // No action if it cannot be hit or color does not match</span>
+        }
+
+
+        // Check if the ball's color matches the wall's color
+<span class="pc bpc" id="L37" title="1 of 4 branches missed.">        if (ball.getColour() != this.colour &amp;&amp; this.colour != 0) {</span>
+<span class="nc" id="L38">            System.out.println(&quot;ColouredWallTile get hit at (&quot; + getX() + &quot;, &quot; + getY() + &quot;) , Different Colour!&quot;);</span>
+<span class="nc" id="L39">            return; // Exit without applying any damage if the color doesn't match</span>
+        }
+
+        // If the colors match or if it's a grey wall (colour index 0), proceed with damage
+<span class="fc" id="L43">        damageLevel++;</span>
+<span class="fc" id="L44">        System.out.println(&quot;ColouredWallTile get hit at (&quot; + getX() + &quot;, &quot; + getY() + &quot;), Same colour Apply damage! Damage Level: &quot; + damageLevel);</span>
+
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        if (damageLevel &lt; MAX_DAMAGE_LEVEL) {</span>
+            // Update the wall's sprite based on the damage level
+<span class="nc" id="L48">            updateImages(app);</span>
+        } else {
+            // Remove the wall after reaching the maximum damage level
+<span class="nc" id="L51">            removeDamagedWall();</span>
+        }
+<span class="nc" id="L53">        canBeHit = false; // Set the wall as temporarily invulnerable</span>
+<span class="nc" id="L54">        cooldownCounter = HIT_COOLDOWN_FRAMES; // Reset the cooldown counter</span>
+<span class="nc" id="L55">    }</span>
+
+    protected void updateImages(App app) {
+        // Change the sprite based on the damage level and color
+<span class="pc bpc" id="L59" title="2 of 3 branches missed.">        switch (damageLevel) {</span>
+            case 1:
+<span class="fc" id="L61">                break;</span>
+            case 2:
+<span class="nc" id="L63">                this.Image = app.loadImage(&quot;src/main/resources/inkball/walld&quot; + colour + &quot;.png&quot;);</span>
+<span class="nc" id="L64">                break;</span>
+            default:
+                break;
+        }
+
+        // Redraw the tile in the next draw call
+<span class="nc" id="L70">        app.getTile(x, y).draw(app);</span>
+<span class="nc" id="L71">    }</span>
+    
+    public int getColour() {
+<span class="fc" id="L74">        return colour;</span>
+    }
+
+    // Getters and setters for testing purposes
+    public boolean isCanBeHit() {
+<span class="fc" id="L79">        return canBeHit;</span>
+    }
+
+    public void setCanBeHit(boolean canBeHit) {
+<span class="fc" id="L83">        this.canBeHit = canBeHit;</span>
+<span class="fc" id="L84">    }</span>
+
+    public int getCooldownCounter() {
+<span class="fc" id="L87">        return cooldownCounter;</span>
+    }
+
+    public void setCooldownCounter(int cooldownCounter) {
+<span class="fc" id="L91">        this.cooldownCounter = cooldownCounter;</span>
+<span class="fc" id="L92">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

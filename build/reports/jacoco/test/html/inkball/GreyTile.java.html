@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GreyTile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">home</a> &gt; <a href="index.source.html" class="el_package">inkball</a> &gt; <span class="el_source">GreyTile.java</span></div><h1>GreyTile.java</h1><pre class="source lang-java linenums">package inkball;
+
+public class GreyTile extends Tile {
+<span class="fc" id="L4">    protected int damageLevel = 0;</span>
+    protected App app;
+    protected static final int MAX_DAMAGE_LEVEL = 3; // Maximum damage level before the wall is destroyed
+<span class="fc" id="L7">    protected boolean isDestroyed = false; // Track if the wall is destroyed</span>
+<span class="fc" id="L8">    private boolean canBeHit = true;</span>
+    private static final int HIT_COOLDOWN_FRAMES = 5; // Number of frames to wait before the wall can be hit again
+<span class="fc" id="L10">    private int cooldownCounter = 0;</span>
+
+
+    public GreyTile(int x, int y, App app) {
+<span class="fc" id="L14">        super(x, y, app);</span>
+<span class="fc" id="L15">        this.app = app;</span>
+<span class="fc" id="L16">        this.Image = app.loadImage(&quot;src/main/resources/inkball/wall0.png&quot;); // Initial wall image</span>
+<span class="fc" id="L17">    }</span>
+
+    @Override
+    public boolean canBeHit() {
+<span class="pc bpc" id="L21" title="1 of 2 branches missed.">        return !isDestroyed; // Wall is solid unless it is destroyed</span>
+    }
+
+    public void updateCooldown() {
+<span class="fc bfc" id="L25" title="All 2 branches covered.">        if (!canBeHit) {</span>
+<span class="fc" id="L26">            cooldownCounter--;</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">            if (cooldownCounter &lt;= 0) {</span>
+<span class="fc" id="L28">                canBeHit = true;</span>
+            }
+        }
+<span class="fc" id="L31">    }</span>
+
+    public void getsHit(Ball ball) {
+<span class="pc bpc" id="L34" title="2 of 4 branches missed.">        if (!canBeHit || isDestroyed) {</span>
+<span class="nc" id="L35">            return; // Skip if the wall is still in cooldown or destroyed</span>
+        }
+
+<span class="fc" id="L38">        damageLevel++;</span>
+<span class="fc" id="L39">        System.out.println(&quot;WallTile at (&quot; + x + &quot;, &quot; + y + &quot;) hit. Damage Level: &quot; + damageLevel);</span>
+
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        if (damageLevel &lt; MAX_DAMAGE_LEVEL) {</span>
+            // Update the wall's sprite based on the damage level
+<span class="fc" id="L43">            updateImage(app);</span>
+        } else {
+            // Remove the wall after reaching the maximum damage level
+<span class="nc" id="L46">            removeDamagedWall();</span>
+        }
+<span class="fc" id="L48">        canBeHit = false; // Set the wall as temporarily invulnerable</span>
+<span class="fc" id="L49">        cooldownCounter = HIT_COOLDOWN_FRAMES; // Reset the cooldown counter</span>
+<span class="fc" id="L50">    }</span>
+
+    private void updateImage(App app) {
+<span class="pc bpc" id="L53" title="2 of 3 branches missed.">        switch (damageLevel) {</span>
+            case 1:
+<span class="fc" id="L55">                break;</span>
+            case 2:
+                // Reload the same image and apply transparency
+<span class="nc" id="L58">                this.Image = app.loadImage(&quot;src/main/resources/inkball/walld0.png&quot;);</span>
+<span class="nc" id="L59">                break;</span>
+            default:
+                break;
+        }
+        
+        // Redraw the tile with the updated sprite
+<span class="fc" id="L65">        app.getTile(x, y).draw(app);</span>
+        // Reset tint to default after applying it to avoid affecting other drawings
+<span class="fc" id="L67">        app.noTint();</span>
+<span class="fc" id="L68">    }</span>
+    
+    public void removeDamagedWall() {
+<span class="nc" id="L71">        isDestroyed = true; // Mark the wall as destroyed</span>
+<span class="nc" id="L72">        this.Image = null; // Remove the sprite to indicate the wall is gone</span>
+<span class="nc" id="L73">        app.getGrid()[y][x] = null; // Remove the tile from the game board</span>
+<span class="nc" id="L74">        System.out.println(&quot;Wall at (&quot; + x + &quot;, &quot; + y + &quot;) destroyed.&quot;);</span>
+<span class="nc" id="L75">    }</span>
+
+    // Getter for the damage level
+    public int getDamageLevel() {
+<span class="nc" id="L79">        return damageLevel;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
